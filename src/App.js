@@ -4,12 +4,26 @@ import xhr from 'xhr'
 
 class App extends Component {
   state = {
-    location: ''
+    location: '',
+    data: {}
   };
 
   fetchData = (evt) => {
     evt.preventDefault();
-    console.log('fetch data for ', this.state.location);
+    var location = encodeURIComponent(this.state.location);
+
+    var urlPrefix = 'http://api.openweathermap.org/data/2.5/forecast?q=';
+    var urlSuffix = '&APPID=69f49ea2d2cbd6b98a3ce415be2670bb&units=metric';
+    var url = urlPrefix + location + urlSuffix;
+
+    var self = this
+
+    xhr({
+      url: url
+    }, function (err, data) {
+      self.setState({ data: JSON.parse(data.body)
+      });
+    });
   };
   changeLocation = (evt) => {
     this.setState({
@@ -17,6 +31,10 @@ class App extends Component {
     });
   };
   render() {
+    var currentTemp = 'not loaded yet';
+    if (this.state.data.list) {
+      currentTemp = this.state.data.list[0].main.temp;
+    }
     return (
       <div>
         <h1>Weather</h1>
@@ -31,9 +49,14 @@ class App extends Component {
              />
           </label>
         </form>
+        <p className="temp-wrapper">
+          <span className="temp">{ currentTemp }</span>
+          <span className="temp-symbol">C</span>
+        </p>
       </div> 
     );
   }
 }
 
 export default App;
+
